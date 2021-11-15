@@ -17,7 +17,7 @@ const options = {
   
   module.exports = {
     // Modifica las rutas usadas por npm build
-    // publicPath: './', 
+    // publicPath: './',
     pages: {
       index: {
         entry: 'src/app.js'
