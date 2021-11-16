@@ -1,92 +1,64 @@
-import axios from "axios";
+// import axios from "axios";
 import Vue from "vue";
-import { SERVER_URL } from "./constants.js";
+// import { SERVER_URL } from "./constants.js";
 
 const state = {
-  user: {
-    // Datos del usuario logeado en la aplicacion
-    id: null, username: null, email: null, token: null
-  }
+  token: null
 };
 
 const mutations = {
-  SET_USER(state, user) {
-    Vue.set(state, "user", user);
-    window.sessionStorage.setItem("_user", JSON.stringify(user));
-  },
   SET_TOKEN(state, token) {
-    Vue.set(state.user, "token", token);
-  },
-  SET_LOGIN_DETAILS(state, { username, email }) {
-    Vue.set(state.user, "username", username);
-    Vue.set(state.user, "email", email);
+    Vue.set(state, "token", token);
   },
 };
 
 const getters = {
   isLogged: (state) => () => {
-    if (state.user.token !== null) {
+    if (state.token !== null) {
       return true;
     }
     return false;
   },
   getToken: (state) => () => {
-    return state.user.token;
+    return state.token;
   },
-  getUser() {
-    return state.user;
-  }
 };
 
 const actions = {
+  async tokenValidation() {
+    // Comprobamos que el token sea valido
+    return { data: "", status: 200 }
+  },
   async login({ commit }, { username, password }) {
-    return await axios
-      .post(SERVER_URL + "/api/v1/users/login", { username, password })
-      .then(function (response) {
-        if(response.status == 200) {
-          commit("SET_USER", response.data);
-        }
-        return response;
-      })
-      .catch(function (error) {
-        // Si no se puede alcanzar el servidor ...
-        // Ponemos el codigo y mensaje nosotros ya que si no estara vacio.
-        if (typeof error.response === "undefined") {
-          return {
-            status: -1,
-            data: "Network error",
-          };
-        }
-        return error.response;
-      });
-  },
-  async register({ username, password, email }) {
-    let data = { username: username, password: password, email: email };
-    return await axios
-      .post(SERVER_URL + "/api/v1/users/registration", data)
-      .then(function (response) {
-        return response;
-      })
-      .catch(function (error) {
-        return error.response;
-      });
-  },
-  async updateLoginDetails({ commit }, details) {
-    return await axios
-      .put(SERVER_URL + "/api/v1/users", details)
-      .then(function (response) {
-        // Si el request tuvo exito (codigo 200)
-        if (response.status == 200) {
-          commit("SET_LOGIN_DETAILS", response.data);
-        }
-        return response;
-      })
-      .catch(function (error) {
-        return error.response;
-      });
+    commit("user/SET_USER", {id: 1, username, email: "demo@gmail.com", token: password}, { root: true });
+    commit("SET_TOKEN", password);
+    return { status: 200 };
+    // commit("SET_TOKEN", password)
+    // window.sessionStorage.setItem("_token", JSON.stringify(password));
+    // return await axios
+    //   .post(SERVER_URL + "/api/v1/users/login", { username, password })
+    //   .then(function (response) {
+    //     if(response.status == 200) {
+    //       commit("user/SET_USER", response.data);
+    //       commit("SET_TOKEN", response.data.token)
+    //       window.sessionStorage.setItem("_token", JSON.stringify(response.data.token));
+    //     }
+    //     return response;
+    //   })
+    //   .catch(function (error) {
+    //     // Si no se puede alcanzar el servidor ...
+    //     // Ponemos el codigo y mensaje nosotros ya que si no estara vacio.
+    //     if (typeof error.response === "undefined") {
+    //       return {
+    //         status: -1,
+    //         data: "Network error",
+    //       };
+    //     }
+    //     return error.response;
+    //   });
   },
   async logout({ commit }) {
-    window.sessionStorage.removeItem('_user');
+    window.sessionStorage.removeItem('_token');
     commit("SET_TOKEN", null);
     commit("app/SET_READY", false, { root: true });
   },

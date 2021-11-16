@@ -17,59 +17,11 @@ const getters = {
   isAppReady: (state) => () => {
     return state.appReady;
   },
-  getAuthHeader: (state, getters, rootState, rootGetters) => () => {
-    return "Bearer " + rootGetters["user/getToken"]();
-  },
-  dateToString: () => (date) => {
-    return date.toISOString().split('T')[0];
-  },
 };
 
 const actions = {
-  async tokenValidation() {
-    // Comprobamos que el token sea valido
-    return await axios.get(SERVER_URL + "/api/v1/users/tokenvalidation").then(function (response) {
-      return response;
-    }).catch(function (error) {
-      return error.response;
-    });
-  },
   async init({ dispatch, commit, getters, rootGetters }) {
-    axios.defaults.headers.common["Authorization"] = getters.getAuthHeader();
-
-    // Obtenemos los ingredientes disponibles
-    const response = await axios.get(SERVER_URL + "/api/v1/ingredients")
-      .then(function (response) {
-      let ingredients = {};
-      response.data.forEach((ingredient) => {
-        ingredient.kcals = rootGetters["ingredient/ingredientKcals"](ingredient);
-        ingredients[ingredient.id] = ingredient;
-      });
-      
-      commit("ingredient/SET_INGREDIENTS", ingredients, { root: true });
-      return response;
-    }).catch(function (error){
-      return error.response;
-    });
-
-    // Comprobamos solo la primera response para ver si se puede conectar al servidor etc ...
-    if (typeof response === "undefined" || response.status != 200) {
-      // Si no hay respuesta, no se puede conectar al servidor ...
-      // console.log("server unreacheble");
-
-      // En caso de estar logeados, destruimos la session
-      await dispatch("user/logout", null, { root: true });
-
-      // No se avanza mas ...
-      return;
-    }
-
-    // Profile
-    // await axios.get(SERVER_URL + "/api/v1/user/profile").then(function (response) {
-    //   if (response.status == 200) {
-    //     commit("profile/SET_PROFILE", response.data, { root: true });
-    //   }
-    // });
+    // axios.defaults.headers.common["Authorization"] = getters.getAuthHeader();
 
     await new Promise((r) => setTimeout(r, 1000));
     commit("SET_READY", true);

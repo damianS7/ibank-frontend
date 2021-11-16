@@ -1,14 +1,33 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import security from "./security";
+import user from "./user";
 import app from "./app";
+import security from "./security";
 
 Vue.use(Vuex);
 
+const state = {
+};
+
+const mutations = {
+};
+
+const getters = {
+};
+
+const actions = {
+  
+};
+
 const modules = {
-  app, security
+  app, user, security
 };
 
 export default new Vuex.Store({
-  modules
+  modules,
+  state,
+  mutations,
+  getters,
+  actions,
+  namespaced: true,
 });
