@@ -2,13 +2,6 @@
   <b-col id="login" cols="12" class="d-flex justify-content-center">
     <b-card>
       <img alt="Vue logo" src="@/assets/logo.png" />
-      <b-form-group v-if="registerView">
-        <b-form-input
-          v-model="email"
-          type="email"
-          placeholder="Introduce tu email"
-        ></b-form-input>
-      </b-form-group>
 
       <b-form-group>
         <b-form-input
@@ -27,20 +20,7 @@
       </b-form-group>
 
       <b-form-group>
-        <button
-          v-if="loginView"
-          @click="login"
-          class="btn btn-block btn-primary"
-        >
-          Login
-        </button>
-        <button
-          v-if="registerView"
-          @click="register"
-          class="btn btn-block btn-primary"
-        >
-          Register
-        </button>
+        <button @click="login" class="btn btn-block btn-primary">Login</button>
       </b-form-group>
 
       <b-form-group>
@@ -50,12 +30,6 @@
         <b-alert v-if="errorMessage.length > 0" show variant="danger">
           {{ errorMessage }}
         </b-alert>
-      </b-form-group>
-
-      <b-form-group class="text-center">
-        <a @click="switchView" class="btn btn-link">
-          {{ loginView ? "Necesitas una cuenta?" : "Volver a Login" }}
-        </a>
       </b-form-group>
     </b-card>
   </b-col>
@@ -67,17 +41,31 @@ export default {
     return {
       username: "",
       password: "",
-      email: "",
       errorMessage: "",
       successMessage: "",
-      loginView: true,
-      registerView: false,
     };
   },
   methods: {
-    login() {},
-    register() {},
+    async login() {
+      // Comprueba que los campos no estan vacios
+      if (!this.checkFields()) {
+        return;
+      }
 
+      // Llamada a la accion LOGIN con los datos introducidos por el usuario y
+      // Obtenemos la respuesta enviada por el servidor.
+      let response = await this.$store.dispatch("security/login", {
+        username: this.username,
+        password: this.password,
+      });
+      // Si la respuesta no es exitosa, mostramos el error
+      if (response.status != 200) {
+        this.errorMessage = "Error a logear";
+        return;
+      }
+      // Si la respusta es exitosa (200) cargamos los datos en la app
+      await this.$store.dispatch("app/init");
+    },
     // Comprobacion de los input del componente
     checkFields() {
       if (this.username.length == 0 || this.password.length == 0) {
@@ -85,25 +73,8 @@ export default {
         return false;
       }
 
-      if (this.registerView && this.email.length == 0) {
-        this.errorMessage = "Todos los campos son obligatorios!";
-        return false;
-      }
-
       // Comprobaciones superadas
       return true;
-    },
-
-    // Metodo para cambiar entre vista de usuario y registro
-    switchView() {
-      // Si esta mostrando el formulario de LOGIN ...
-      if (this.loginView) {
-        this.loginView = false; // Se oculta LOGIN
-        this.registerView = true; // Se muestra REGISTER
-      } else {
-        this.loginView = true;
-        this.registerView = false;
-      }
     },
   },
 };
